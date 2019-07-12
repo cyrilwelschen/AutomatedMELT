@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<title>W3.CSS Template</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+<script type="text/javascript" src="/eel.js"></script>
+<style>
+    body,
+    h1 {
+        font-family: "Raleway", sans-serif
+    }
+
+    body,
+    html {
+        height: 100%
+    }
+
+    .bgimg {
+        background-image: url('/img/line.png');
+        height: 100%;
+        background-position: center;
+        background-size: cover;
+    }
+</style>
+
+<body>
+
+    <div class="bgimg w3-display-container w3-animate-opacity">
+        <div class="w3-display-topleft w3-padding-large w3-xlarge">
+            Swisscom RLA-QI
+            <input type=" number" id="nr" />
+        </div>
+        <div class="w3-display-middle">
+            <h1 class="w3-jumbo w3-animate-top">AUTOMATED MELT</h1>
+            <div class=" container">
+                <div class="progress">
+                    <div class="percent"></div>
+                </div>
+                <div class="steps">
+                    <div class="step" id="0"></div>
+                    <div class="step" id="1"></div>
+                    <div class="step" id="2"></div>
+                    <div class="step" id="3"></div>
+                    <div class="step" id="4"></div>
+                    <div class="step" id="5"></div>
+                    <div class="step" id="6"></div>
+                </div>
+            </div>
+            <hr class="w3-border-grey" style="margin:auto;width:40%">
+            <p id="status_text" class="w3-large w3-center" onclick="start()">Click here to start</p>
+        </div>
+        <div class="w3-padding-large w3-display-bottomleft">
+            Powered by cyril.welschen@swisscom.com
+        </div>
+    </div>
+
+</body>
+
+
+<script>
+    let els = document.getElementsByClassName('step');
+    let steps = [];
+    Array.prototype.forEach.call(els, (e) => {
+        steps.push(e);
+    });
+
+    function start() {
+        eel.meas_test();
+    }
+
+    function progress_two() {
+        var stepNum = document.getElementById('nr').value;
+        var p = stepNum * 16.6;
+        if (stepNum === 0) {
+            let p = 0
+        };
+        document.getElementsByClassName('percent')[0].style.width = `${p}%`;
+        steps.forEach((e) => {
+            if (e.id === stepNum) {
+                e.classList.add('selected');
+                e.classList.add('completed');
+            }
+            if (e.id < stepNum) {
+                e.classList.add('completed');
+            }
+            if (e.id > stepNum) {
+                e.classList.remove('selected', 'completed');
+            }
+        });
+    }
+
+    eel.expose(changeProgress);
+    function changeProgress(nr) {
+        document.getElementById('nr').value = nr;
+        if (nr === 1) {
+            document.getElementById('status_text').innerHTML = "Connecting..."
+        } else if (nr === 2) {
+            document.getElementById('status_text').innerHTML = "Voltage measurements..."
+        } else if (nr === 3) {
+            document.getElementById('status_text').innerHTML = "Switch position"
+        } else if (nr === 4) {
+            document.getElementById('status_text').innerHTML = "Z, R, C measurements..."
+        } else if (nr === 5) {
+            document.getElementById('status_text').innerHTML = "Creating export..."
+        } else if (nr === 6) {
+            document.getElementById('status_text').innerHTML = "Done!"
+        }
+        progress_two();
+    }
+</script>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        position: absolute;
+        top: 170%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .steps {
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        width: 600px;
+    }
+
+    .step {
+        width: 20px;
+        height: 20px;
+        background: #fff;
+        border: 2px solid #ACACA6;
+        border-radius: 50%;
+    }
+
+    .step.selected {
+        border: 2px solid #000
+    }
+
+    .step.completed {
+        border: 2px solid #000;
+        background: #000
+    }
+
+    .progress {
+        position: absolute;
+        width: 100%;
+        height: 50%;
+        border-bottom: 2px solid #ACACA6;
+        z-index: -1;
+    }
+
+    .percent {
+        position: absolute;
+        width: 0;
+        height: 100%;
+        border-bottom: 2px solid #000;
+        z-index: 1;
+        transition: width 1s;
+    }
+</style>
+
+</html>
