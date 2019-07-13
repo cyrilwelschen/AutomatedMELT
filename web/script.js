@@ -1,6 +1,6 @@
 function start() {
     document.getElementById('status_text').innerHTML = "Connecting..."
-    eel.meas_test();
+    eel.measure_voltages();
 }
 
 function progress_two() {
@@ -48,4 +48,5 @@ function changeProgress(nr) {
 eel.expose(alertSwitch);
 function alertSwitch() {
     alert("Please move switch position to measure impedance");
+    eel.measure_impedance();
 }
