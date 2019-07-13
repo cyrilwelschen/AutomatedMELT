@@ -50,3 +50,8 @@ function alertSwitch() {
     alert("Please move switch position to measure impedance");
     eel.measure_impedance();
 }
+
+function openExcel() {
+    eel.open_excel();
+    document.getElementById('status_text').innerHTML = "Opening Excel file..."
+}
