@@ -6,6 +6,7 @@ print(test_import())
 eel.init('web')
 
 c = AnaConnection(excel=True, plot=False)
+file_name = c.excel_filename
 
 @eel.expose
 def meas_test():

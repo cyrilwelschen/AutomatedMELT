@@ -56,6 +56,7 @@ class AnaConnection:
     def __init__(self, plot=False, excel=False):
         self.plot = plot
         self.excel = excel
+        self.excel_filename = file_name
         print("Creating AD2 logical connection instance")
 
     def dwf_version(self):

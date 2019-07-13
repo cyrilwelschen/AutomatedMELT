@@ -26,11 +26,10 @@
 </style>
 
 <body>
-
     <div class="bgimg w3-display-container w3-animate-opacity">
         <div class="w3-display-topleft w3-padding-large w3-xlarge">
             Swisscom RLA-QI
-            <input type=" number" id="nr" />
+            <input type=" number" id="nr" style="display: none" />
         </div>
         <div class="w3-display-middle">
             <h1 class="w3-jumbo w3-animate-top">AUTOMATED MELT</h1>
@@ -50,6 +49,9 @@
             </div>
             <hr class="w3-border-grey" style="margin:auto;width:40%">
             <p id="status_text" class="w3-large w3-center" onclick="start()">Click here to start</p>
+            <a href="/20190713_173208_line_name.xlsx" download="20190713_173208_line_name.xlsx">
+                <img class="w3-center" id="download_excel" style="position: absolute; left:41%; display: none" src="
+                https://img.icons8.com/color/96/000000/microsoft-excel-2019--v2.png"></a>
         </div>
         <div class="w3-padding-large w3-display-bottomleft">
             Powered by cyril.welschen@swisscom.com
@@ -67,6 +69,7 @@
     });
 
     function start() {
+        document.getElementById('status_text').innerHTML = "Connecting..."
         eel.meas_test();
     }
 
@@ -106,8 +109,14 @@
             document.getElementById('status_text').innerHTML = "Creating export..."
         } else if (nr === 6) {
             document.getElementById('status_text').innerHTML = "Done!"
+            document.getElementById("download_excel").style.display = "block";
         }
         progress_two();
+    }
+
+    eel.expose(alertSwitch);
+    function alertSwitch() {
+        alert("Please move switch position to measure impedance");
     }
 </script>
 
