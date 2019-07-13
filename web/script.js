@@ -51,6 +51,12 @@ function alertSwitch() {
     eel.measure_impedance();
 }
 
+eel.expose(alertConnectionFailed);
+function alertConnectionFailed() {
+    alert("No Analogue Discovery device was found, please check connection");
+    eel.measure_voltages();
+}
+
 function openExcel() {
     eel.open_excel();
     document.getElementById('status_text').innerHTML = "Opening Excel file..."

@@ -8,33 +8,43 @@ eel.init('web')
 c = AnaConnection(excel=True, plot=False)
 file_name = c.excel_filename
 
+prod = True
+
 @eel.expose
 def measure_voltages():
     eel.changeProgress(1)
-    # c.connect()
-    time.sleep(1.5)
+    if prod:
+        successfully_connected = c.connect()
+        if not successfully_connected:
+            eel.alertConnectionFailed()
+            return False
+    else:
+        time.sleep(1.5)
     eel.changeProgress(2)
-    """
-    buffer_size = 1024
-    c.sample_voltage(frequency=68000.0, buffer_size=buffer_size, extension_scaling_factor=18)
-    c.disconnect()
-    """
-    time.sleep(1.5)
+    if prod:
+        buffer_size = 1024
+        c.sample_voltage(frequency=68000.0, buffer_size=buffer_size, extension_scaling_factor=18)
+        c.disconnect()
+    else:
+        time.sleep(1.5)
     eel.changeProgress(3)
+    time.sleep(0.5)
     eel.alertSwitch()
 
 @eel.expose
 def measure_impedance():
     eel.changeProgress(4)
-    """
-    c.connect()
-    c.imp_mag_phase_cap(steps=100, start=1e2, stop=1e6, reference=1e2)
-    c.disconnect()
-    """
-    time.sleep(1)
+    if prod:
+        c.connect()
+        c.imp_mag_phase_cap(steps=100, start=1e2, stop=1e6, reference=1e2)
+        c.disconnect()
+    else:
+        time.sleep(1.5)
     eel.changeProgress(5)
-    # make_plots()
-    time.sleep(1)
+    if prod:
+        make_plots()
+    else:
+        time.sleep(1)
     eel.changeProgress(6)
 
 @eel.expose
