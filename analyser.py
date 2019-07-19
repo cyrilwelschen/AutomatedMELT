@@ -27,7 +27,14 @@ ws_impedance = wb.create_sheet("Impedance", 2)
 wb.remove(ws)
 
 # will be user input later
-working_directory = "./"
+working_directory = """O:\Admin\INI\RLA\ADP\QI\\0_Public\RFT-V Messgerät\AD2_automated_MELT_Results"""
+# test permission
+test_dir_permission = True
+if test_dir_permission:
+    if os.path.exists(working_directory):
+        print("Permission to working directory granted")
+    else:
+        print("no permission or working dir doesn't exist")
 line_name = "line_name"
 file_name = '{}_{}.xlsx'.format(dt.now().strftime("%Y%m%d_%H%M%S"), line_name)
 wb_path = os.path.join(working_directory, file_name) 
