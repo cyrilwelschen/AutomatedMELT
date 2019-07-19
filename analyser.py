@@ -150,7 +150,7 @@ class AnaConnection:
         dwf.FDwfAnalogIOEnableSet(self.hdwf, c_int(True))
         print("Reference: "+str(reference)+" Ohm  Frequency: "+str(start)+" Hz ... "+str(stop/1e3)+" kHz for nanofarad capacitors")
         dwf.FDwfAnalogImpedanceReset(self.hdwf)
-        dwf.FDwfAnalogImpedanceModeSet(self.hdwf, c_int(0)) # 0 = W1-C1-DUT-C2-R-GND (resistor first), 1 = W1-C1-R-C2-DUT-GND (DUT first), 8 = AD IA adapter
+        dwf.FDwfAnalogImpedanceModeSet(self.hdwf, c_int(1)) # 0 = W1-C1-DUT-C2-R-GND (resistor first), 1 = W1-C1-R-C2-DUT-GND (DUT first), 8 = AD IA adapter
         dwf.FDwfAnalogImpedanceReferenceSet(self.hdwf, c_double(reference)) # reference resistor value in Ohms
         dwf.FDwfAnalogImpedanceFrequencySet(self.hdwf, c_double(start)) # frequency in Hertz
         dwf.FDwfAnalogImpedanceAmplitudeSet(self.hdwf, c_double(1)) # 1V amplitude = 2V peak2peak signal
@@ -269,10 +269,10 @@ class AnaConnection:
             ws_overview["C2"] = str(avg_ch1) + " V"
             ws_voltage["G2"] = str(avg_ch2) + " V"
             ws_overview["C3"] = str(avg_ch2) + " V"
-            ws_voltage["G3"] = str(np.sqrt(np.sum(rgdSamplesCh1**2)/len(rgdSamplesCh1))) + " V"
-            ws_overview["I2"] = str(np.sqrt(np.sum(rgdSamplesCh1**2)/len(rgdSamplesCh1))) + " V"
-            ws_voltage["G4"] = str(np.sqrt(np.sum(rgdSamplesCh2**2)/len(rgdSamplesCh2))) + " V"
-            ws_overview["I3"] = str(np.sqrt(np.sum(rgdSamplesCh2**2)/len(rgdSamplesCh2))) + " V"
+            ws_voltage["G3"] = str(np.sqrt(np.sum((rgdSamplesCh1-avg_ch1)**2)/len(rgdSamplesCh1))) + " V"
+            ws_overview["I2"] = str(np.sqrt(np.sum((rgdSamplesCh1-avg_ch1)**2)/len(rgdSamplesCh1))) + " V"
+            ws_voltage["G4"] = str(np.sqrt(np.sum((rgdSamplesCh2-avg_ch2)**2)/len(rgdSamplesCh2))) + " V"
+            ws_overview["I3"] = str(np.sqrt(np.sum((rgdSamplesCh2-avg_ch2)**2)/len(rgdSamplesCh2))) + " V"
             wb.save(wb_path)
             print("Voltages saved to excel")
         if self.plot:
