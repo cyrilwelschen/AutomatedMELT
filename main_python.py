@@ -51,4 +51,4 @@ def open_excel():
     import os
     os.system('start excel.exe {}'.format(c.file_name))
 
-eel.start('index.html')
+eel.start('main.html')
