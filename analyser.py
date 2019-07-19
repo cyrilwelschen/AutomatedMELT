@@ -139,6 +139,15 @@ class AnaConnection:
         rgCp = [0.0]*steps # parallel capacitance
         rgPs = [0.0]*steps # imp phase
         # setup
+        # enable positive supply
+        dwf.FDwfAnalogIOChannelNodeSet(self.hdwf, c_int(0), c_int(0), c_double(True)) 
+        # set voltage to 5 V
+        dwf.FDwfAnalogIOChannelNodeSet(self.hdwf, c_int(0), c_int(1), c_double(5.0)) 
+        # enable negative supply
+        dwf.FDwfAnalogIOChannelNodeSet(self.hdwf, c_int(1), c_int(0), c_double(True)) 
+        # set voltage to -5 V
+        dwf.FDwfAnalogIOChannelNodeSet(self.hdwf, c_int(1), c_int(1), c_double(-5.0)) 
+        dwf.FDwfAnalogIOEnableSet(self.hdwf, c_int(True))
         print("Reference: "+str(reference)+" Ohm  Frequency: "+str(start)+" Hz ... "+str(stop/1e3)+" kHz for nanofarad capacitors")
         dwf.FDwfAnalogImpedanceReset(self.hdwf)
         dwf.FDwfAnalogImpedanceModeSet(self.hdwf, c_int(0)) # 0 = W1-C1-DUT-C2-R-GND (resistor first), 1 = W1-C1-R-C2-DUT-GND (DUT first), 8 = AD IA adapter
