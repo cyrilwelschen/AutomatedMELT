@@ -9,8 +9,8 @@ c = AnaConnection(excel=True, plot=False)
 prod = True
 
 @eel.expose
-def measure_voltages():
-    c.create_wb()
+def measure_voltages(ln):
+    c.create_wb(line_name=ln)
     eel.changeProgress(1)
     if prod:
         successfully_connected = c.connect()

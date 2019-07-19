@@ -46,7 +46,7 @@ class AnaConnection:
         self.ws_overview = None
         print("Creating AD2 logical connection instance")
 
-    def create_wb(self):
+    def create_wb(self, line_name="line_name"):
         self.wb = Workbook()
         ws = self.wb.active
         self.ws_overview = self.wb.create_sheet("Overview", 0)
@@ -57,7 +57,6 @@ class AnaConnection:
         # test permission
         if not os.path.exists(working_directory):
             working_directory = "./"
-        line_name = "line_name"
         self.file_name = '{}_{}.xlsx'.format(dt.now().strftime("%Y%m%d_%H%M%S"), line_name)
         self.wb_path = os.path.join(working_directory, self.file_name) 
         self.ws_overview["A1"] = "Filename: {}".format(self.file_name)

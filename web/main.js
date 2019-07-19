@@ -1,7 +1,8 @@
 function start() {
     document.getElementById('status_text').innerHTML = "Connecting..."
     document.getElementById("download_excel").style.display = "none";
-    eel.measure_voltages();
+    var ln = document.getElementById("line_name").value;
+    eel.measure_voltages(ln);
 }
 
 function progress_two() {
