@@ -1,5 +1,6 @@
 function start() {
     document.getElementById('status_text').innerHTML = "Connecting..."
+    document.getElementById("download_excel").style.display = "none";
     eel.measure_voltages();
 }
 
@@ -39,7 +40,7 @@ function changeProgress(nr) {
     } else if (nr === 5) {
         document.getElementById('status_text').innerHTML = "Creating export..."
     } else if (nr === 6) {
-        document.getElementById('status_text').innerHTML = "Done!"
+        document.getElementById('status_text').innerHTML = "Done! | New Measurement"
         document.getElementById("download_excel").style.display = "block";
     }
     progress_two();

@@ -19,28 +19,6 @@ from openpyxl.chart import (
 )
 from openpyxl.chart.axis import DateAxis
 
-wb = Workbook()
-ws = wb.active
-ws_overview = wb.create_sheet("Overview", 0)
-ws_voltage = wb.create_sheet("Voltages", 1)
-ws_impedance = wb.create_sheet("Impedance", 2)
-wb.remove(ws)
-
-# will be user input later
-working_directory = """O:\Admin\INI\RLA\ADP\QI\\0_Public\RFT-V Messgerät\AD2_automated_MELT_Results"""
-# test permission
-test_dir_permission = True
-if test_dir_permission:
-    if os.path.exists(working_directory):
-        print("Permission to working directory granted")
-    else:
-        print("no permission or working dir doesn't exist")
-line_name = "line_name"
-file_name = '{}_{}.xlsx'.format(dt.now().strftime("%Y%m%d_%H%M%S"), line_name)
-wb_path = os.path.join(working_directory, file_name) 
-ws_overview["A1"] = "Filename: {}".format(file_name)
-wb.save(wb_path)
-
 if sys.platform.startswith("win"):
     dwf = cdll.dwf
 elif sys.platform.startswith("darwin"):
@@ -56,15 +34,34 @@ def write(ws, headers, *data):
 def make_chart(ws_data=None, ws_graph=None, ws_grap_startfield="A1", min_col=2, min_row=1, max_col=4, max_row=12, y_name="Y-Axis", x_name="X-Axis"):
     assert ws_data and ws_graph, "Excel Worksheets missing"
 
-def test_import():
-    return "analyser.py successfully imported"
-
 class AnaConnection:
     def __init__(self, plot=False, excel=False):
         self.plot = plot
         self.excel = excel
-        self.excel_filename = file_name
+        self.wb = None
+        self.wb_path = None
+        self.file_name = None
+        self.ws_voltage = None
+        self.ws_impedance = None
+        self.ws_overview = None
         print("Creating AD2 logical connection instance")
+
+    def create_wb(self):
+        self.wb = Workbook()
+        ws = self.wb.active
+        self.ws_overview = self.wb.create_sheet("Overview", 0)
+        self.ws_voltage = self.wb.create_sheet("Voltages", 1)
+        self.ws_impedance = self.wb.create_sheet("Impedance", 2)
+        self.wb.remove(ws)
+        working_directory = """O:\Admin\INI\RLA\ADP\QI\\0_Public\RFT-V Messgerät\AD2_automated_MELT_Results"""
+        # test permission
+        if not os.path.exists(working_directory):
+            working_directory = "./"
+        line_name = "line_name"
+        self.file_name = '{}_{}.xlsx'.format(dt.now().strftime("%Y%m%d_%H%M%S"), line_name)
+        self.wb_path = os.path.join(working_directory, self.file_name) 
+        self.ws_overview["A1"] = "Filename: {}".format(self.file_name)
+        self.wb.save(self.wb_path)
 
     def dwf_version(self):
         #print(DWF version)
@@ -73,6 +70,7 @@ class AnaConnection:
         print("DWF Version: "+str(version.value))
 
     def connect(self):
+        self.excel_filename = self.file_name
         print("Establish AD2 connection")
         self.hdwf = c_int()
         dwf.FDwfDeviceOpen(c_int(-1), byref(self.hdwf))
@@ -197,8 +195,8 @@ class AnaConnection:
         
         #processing
         if self.excel:
-            write(ws_impedance, ["Freq [Hz]", "|Z| [Ohm]", "Phase [deg]", "C_p [F]"], rgHz, rgZs, rgPs, rgCp)
-            wb.save(wb_path)
+            write(self.ws_impedance, ["Freq [Hz]", "|Z| [Ohm]", "Phase [deg]", "C_p [F]"], rgHz, rgZs, rgPs, rgCp)
+            self.wb.save(self.wb_path)
             print("Voltages saved to excel")
         if self.plot:
             fig = plt.plot(rgHz, rgZs, label="Imp |Z| [Ohm]")
@@ -261,26 +259,26 @@ class AnaConnection:
         dc21 = dc1 - dc2
         print([round(dc1, 2), round(dc2, 2), round(dc21, 2)])
         if self.excel:
-            write(ws_voltage, ["t [s]", "Ch1 [V]", "Ch2 [V]"], np.arange(buffer_size)*1/frequency, rgdSamplesCh1, rgdSamplesCh2)
-            ws_voltage["E1"] = "Avg. Ch1"
-            ws_overview["B2"] = "Avg. Ch1"
-            ws_voltage["E2"] = "Avg. Ch2"
-            ws_overview["B3"] = "Avg. Ch2"
-            ws_voltage["E3"] = "AC RMS Ch1"
-            ws_overview["G2"] = "AC RMS Ch1"
-            ws_voltage["E4"] = "AC RMS Ch2"
-            ws_overview["G3"] = "AC RMS Ch2"
+            write(self.ws_voltage, ["t [s]", "Ch1 [V]", "Ch2 [V]"], np.arange(buffer_size)*1/frequency, rgdSamplesCh1, rgdSamplesCh2)
+            self.ws_voltage["E1"] = "Avg. Ch1"
+            self.ws_overview["B2"] = "Avg. Ch1"
+            self.ws_voltage["E2"] = "Avg. Ch2"
+            self.ws_overview["B3"] = "Avg. Ch2"
+            self.ws_voltage["E3"] = "AC RMS Ch1"
+            self.ws_overview["G2"] = "AC RMS Ch1"
+            self.ws_voltage["E4"] = "AC RMS Ch2"
+            self.ws_overview["G3"] = "AC RMS Ch2"
             avg_ch1 = np.mean(rgdSamplesCh1)
             avg_ch2 = np.mean(rgdSamplesCh2)
-            ws_voltage["G1"] = str(avg_ch1) + " V"
-            ws_overview["C2"] = str(avg_ch1) + " V"
-            ws_voltage["G2"] = str(avg_ch2) + " V"
-            ws_overview["C3"] = str(avg_ch2) + " V"
-            ws_voltage["G3"] = str(np.sqrt(np.sum((rgdSamplesCh1-avg_ch1)**2)/len(rgdSamplesCh1))) + " V"
-            ws_overview["I2"] = str(np.sqrt(np.sum((rgdSamplesCh1-avg_ch1)**2)/len(rgdSamplesCh1))) + " V"
-            ws_voltage["G4"] = str(np.sqrt(np.sum((rgdSamplesCh2-avg_ch2)**2)/len(rgdSamplesCh2))) + " V"
-            ws_overview["I3"] = str(np.sqrt(np.sum((rgdSamplesCh2-avg_ch2)**2)/len(rgdSamplesCh2))) + " V"
-            wb.save(wb_path)
+            self.ws_voltage["G1"] = str(avg_ch1) + " V"
+            self.ws_overview["C2"] = str(avg_ch1) + " V"
+            self.ws_voltage["G2"] = str(avg_ch2) + " V"
+            self.ws_overview["C3"] = str(avg_ch2) + " V"
+            self.ws_voltage["G3"] = str(np.sqrt(np.sum((rgdSamplesCh1-avg_ch1)**2)/len(rgdSamplesCh1))) + " V"
+            self.ws_overview["I2"] = str(np.sqrt(np.sum((rgdSamplesCh1-avg_ch1)**2)/len(rgdSamplesCh1))) + " V"
+            self.ws_voltage["G4"] = str(np.sqrt(np.sum((rgdSamplesCh2-avg_ch2)**2)/len(rgdSamplesCh2))) + " V"
+            self.ws_overview["I3"] = str(np.sqrt(np.sum((rgdSamplesCh2-avg_ch2)**2)/len(rgdSamplesCh2))) + " V"
+            self.wb.save(self.wb_path)
             print("Voltages saved to excel")
         if self.plot:
             plt.plot(np.fromiter(rgdSamplesCh2, dtype = np.float), label="Ch 2")
@@ -327,76 +325,76 @@ class AnaConnection:
         dwf.FDwfAnalogImpedanceConfigure(self.hdwf, c_int(0)) # stop
         dwf.FDwfDeviceClose(self.hdwf)
 
+    def make_plots(self):
+        c1 = LineChart()
+        c1.style = 13
+        c1.y_axis.title = '|Z| [Ohm]'
+        c1.y_axis.scaling.logBase = 10
+        c1.x_axis.title = 'Frequency [Hz]'
+        c1.width = 37
+        c1.height = 9.5
+        data = Reference(self.ws_impedance, min_col=2, min_row=1, max_row=101)
+        c1.add_data(data, titles_from_data=True)
+        # Style the lines
+        for i in range(len(c1.series)):
+            sx = c1.series[i]
+            sx.smooth = True
+        x_axis = Reference(self.ws_impedance, min_col=1, min_row=1, max_row=101)
+        c1.set_categories(x_axis)
+        # second chart
+        c2 = LineChart()
+        c2.y_axis.scaling.logBase = 10
+        c2.y_axis.majorGridlines = None
+        data = Reference(self.ws_impedance, min_col=4, min_row=1, max_row=101)
+        c2.add_data(data, titles_from_data=True)
+        c2.y_axis.axId = 200
+        c2.y_axis.title = 'C_p [F]'
+        # Style the lines
+        for i in range(len(c2.series)):
+            sx = c2.series[i]
+            sx.smooth = True
+        # x_axis = Reference(self.ws_impedance, min_col=1, min_row=1, max_row=101)
+        # c2.set_categories(x_axis)
+        c2.y_axis.crosses = "max"
+        c1 += c2
+        self.ws_overview.add_chart(c1, "A5")
+        # second plot
+        c1 = LineChart()
+        c1.style = 13
+        c1.y_axis.title = 'Phase [degree]'
+        c1.x_axis.title = 'Frequency [Hz]'
+        c1.width = 37
+        c1.height = 9.5
+        data = Reference(self.ws_impedance, min_col=3, min_row=1, max_row=101)
+        c1.add_data(data, titles_from_data=True)
+        # Style the lines
+        for i in range(len(c1.series)):
+            sx = c1.series[i]
+            sx.smooth = True
+        x_axis = Reference(self.ws_impedance, min_col=1, min_row=1, max_row=101)
+        c1.set_categories(x_axis)
+        self.ws_overview.add_chart(c1, "A24")
+        self.wb.save(self.wb_path)
+        
+    def make_voltage_plots(self, buffer_size):
+        v_chart = LineChart()
+        v_chart.style = 13
+        v_chart.y_axis.title = 'Voltage [V]'
+        v_chart.x_axis.title = 'time [s]'
+        v_chart.width = 37
+        v_chart.height = 9.5
+        voltages = Reference(self.ws_voltage, min_col=2, max_col=3, min_row=1, max_row=buffer_size)
+        v_chart.add_data(voltages, titles_from_data=True)
+        for i in range(len(v_chart.series)):
+            sx = v_chart.series[i]
+            sx.smooth = True
+        x_axis = Reference(self.ws_voltage, min_col=1, min_row=1, max_row=buffer_size)
+        v_chart.set_categories(x_axis)
+        self.ws_overview.add_chart(v_chart, "A43")
+        self.wb.save(self.wb_path)
+
 def ask_continue():
     ret = "N"
     while ret != "y" and ret != "Y":
         ret = input("Switch position... Ready? Type 'y' to continue ")
     return True
-
-def make_plots():
-    c1 = LineChart()
-    c1.style = 13
-    c1.y_axis.title = '|Z| [Ohm]'
-    c1.y_axis.scaling.logBase = 10
-    c1.x_axis.title = 'Frequency [Hz]'
-    c1.width = 37
-    c1.height = 9.5
-    data = Reference(ws_impedance, min_col=2, min_row=1, max_row=101)
-    c1.add_data(data, titles_from_data=True)
-    # Style the lines
-    for i in range(len(c1.series)):
-        sx = c1.series[i]
-        sx.smooth = True
-    x_axis = Reference(ws_impedance, min_col=1, min_row=1, max_row=101)
-    c1.set_categories(x_axis)
-    # second chart
-    c2 = LineChart()
-    c2.y_axis.scaling.logBase = 10
-    c2.y_axis.majorGridlines = None
-    data = Reference(ws_impedance, min_col=4, min_row=1, max_row=101)
-    c2.add_data(data, titles_from_data=True)
-    c2.y_axis.axId = 200
-    c2.y_axis.title = 'C_p [F]'
-    # Style the lines
-    for i in range(len(c2.series)):
-        sx = c2.series[i]
-        sx.smooth = True
-    # x_axis = Reference(ws_impedance, min_col=1, min_row=1, max_row=101)
-    # c2.set_categories(x_axis)
-    c2.y_axis.crosses = "max"
-    c1 += c2
-    ws_overview.add_chart(c1, "A5")
-    # second plot
-    c1 = LineChart()
-    c1.style = 13
-    c1.y_axis.title = 'Phase [degree]'
-    c1.x_axis.title = 'Frequency [Hz]'
-    c1.width = 37
-    c1.height = 9.5
-    data = Reference(ws_impedance, min_col=3, min_row=1, max_row=101)
-    c1.add_data(data, titles_from_data=True)
-    # Style the lines
-    for i in range(len(c1.series)):
-        sx = c1.series[i]
-        sx.smooth = True
-    x_axis = Reference(ws_impedance, min_col=1, min_row=1, max_row=101)
-    c1.set_categories(x_axis)
-    ws_overview.add_chart(c1, "A24")
-    wb.save(wb_path)
-
-def make_voltage_plots(buffer_size):
-    v_chart = LineChart()
-    v_chart.style = 13
-    v_chart.y_axis.title = 'Voltage [V]'
-    v_chart.x_axis.title = 'time [s]'
-    v_chart.width = 37
-    v_chart.height = 9.5
-    voltages = Reference(ws_voltage, min_col=2, max_col=3, min_row=1, max_row=buffer_size)
-    v_chart.add_data(voltages, titles_from_data=True)
-    for i in range(len(v_chart.series)):
-        sx = v_chart.series[i]
-        sx.smooth = True
-    x_axis = Reference(ws_voltage, min_col=1, min_row=1, max_row=buffer_size)
-    v_chart.set_categories(x_axis)
-    ws_overview.add_chart(v_chart, "A43")
-    wb.save(wb_path)

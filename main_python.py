@@ -2,16 +2,15 @@ import eel
 import time
 from analyser import *
 
-print(test_import())
 eel.init('web')
 
 c = AnaConnection(excel=True, plot=False)
-file_name = c.excel_filename
 
 prod = True
 
 @eel.expose
 def measure_voltages():
+    c.create_wb()
     eel.changeProgress(1)
     if prod:
         successfully_connected = c.connect()
@@ -42,7 +41,7 @@ def measure_impedance():
         time.sleep(1.5)
     eel.changeProgress(5)
     if prod:
-        make_plots()
+        c.make_plots()
     else:
         time.sleep(1)
     eel.changeProgress(6)
@@ -50,6 +49,6 @@ def measure_impedance():
 @eel.expose
 def open_excel():
     import os
-    os.system('start excel.exe {}'.format(file_name))
+    os.system('start excel.exe {}'.format(c.file_name))
 
 eel.start('index.html')
